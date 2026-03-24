@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Tamil Nadu Election System</title>
+
+<link href="https://script.google.com/macros/s/AKfycbyf8IDG9CYJXVbpdenfxOy4nzBOGp-pwtHs-h7DpJ57Se_k5MPeUU0OtzuR3QXFqAt2/exec" rel="stylesheet">
+<style>
+:root{
+  --bg:#05090f;--surface:#0c1420;--surface2:#111e30;--border:#182840;--border2:#1f3350;
+  --accent:#e63946;--accent2:#ff6b6b;--gold:#f4a261;--green:#2ec4b6;--green2:#06d6a0;
+  --blue:#457b9d;--blue2:#74b3ce;
+  --text:#eef2f7;--text2:#7d94b0;--text3:#3d5470;
+  --r:10px;--fd:'Playfair Display',serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+
+.view{display:none;min-height:100vh;flex-direction:column}
+.view.active{display:flex}
+
+/* ── LANDING ── */
+#landing{align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
+.ln-glow{position:absolute;top:-30%;left:50%;transform:translateX(-50%);width:1000px;height:600px;background:radial-gradient(ellipse,rgba(230,57,70,.15) 0%,transparent 65%);pointer-events:none}
+.ln-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.18;mask-image:radial-gradient(ellipse 80% 55% at 50% 0%,black 0%,transparent 80%);pointer-events:none}
+.ln-flag{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#ff9933 33%,#fff 33%,#fff 66%,#138808 66%)}
+.ln-content{position:relative;text-align:center;max-width:580px}
+.ln-emblem{font-size:56px;margin-bottom:14px;filter:drop-shadow(0 0 24px rgba(230,57,70,.35))}
+.ln-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.28);border-radius:99px;padding:5px 16px;margin-bottom:22px;font-size:11px;color:var(--accent2);letter-spacing:2px;text-transform:uppercase;font-family:var(--fm)}
+.ln-sub{font-family:var(--fm);font-size:13px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+.ln-title{font-family:var(--fd);font-size:clamp(2.4rem,5.5vw,4rem);color:var(--text);line-height:1.1;margin-bottom:10px}
+.ln-title span{color:var(--accent)}
+.ln-desc{color:var(--text2);font-size:15px;line-height:1.9;margin-bottom:44px;font-weight:300}
+.ln-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.ln-stats{display:flex;gap:52px;justify-content:center;margin-top:50px}
+.ln-stat .v{font-size:30px;font-weight:700;font-family:var(--fd);color:var(--text)}
+.ln-stat .l{font-size:11px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--r);cursor:pointer;font-family:var(--fb);font-size:14px;font-weight:500;border:none;transition:all .2s}
+.btn-ghost{background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.35);color:var(--accent2)}
+.btn-ghost:hover{background:rgba(230,57,70,.2);transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;box-shadow:0 4px 24px rgba(230,57,70,.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(230,57,70,.5)}
+.btn-green{background:linear-gradient(135deg,#2ec4b6,#06d6a0);color:#fff;box-shadow:0 4px 20px rgba(46,196,182,.35)}
+.btn-green:hover{transform:translateY(-2px)}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn-danger{background:rgba(230,57,70,.1);border:1px solid rgba(230,57,70,.3);color:var(--accent2)}
+.btn-danger:hover{background:rgba(230,57,70,.2)}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.topbar-brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;color:var(--text)}
+.topbar-flag{width:22px;height:14px;background:linear-gradient(#ff9933 33%,#fff 33%,#fff 66%,#138808 66%);border-radius:2px;flex-shrink:0}
+
+/* ── AUTH CARDS ── */
+#admin-auth,#voter-auth{align-items:center;justify-content:center}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:400px;text-align:center}
+.auth-icon{font-size:36px;margin-bottom:16px}
+.auth-title{font-family:var(--fd);font-size:22px;margin-bottom:6px}
+.auth-sub{color:var(--text2);font-size:13px;margin-bottom:22px;line-height:1.6}
+.auth-step{display:none}.auth-step.active{display:block}
+.step-dots{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:22px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--border2);transition:all .3s}
+.sdot.active{background:var(--accent);width:20px;border-radius:4px}
+.sdot.done{background:var(--green2)}
+.demo-creds{background:rgba(230,57,70,.06);border:1px solid rgba(230,57,70,.18);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--text2);text-align:left;font-family:var(--fm);line-height:2}
+.auth-err{color:var(--accent2);font-size:12px;margin-top:8px;display:flex;align-items:center;gap:5px;justify-content:center}
+.auth-ok{color:var(--green2);font-size:12px;margin-top:8px;display:flex;align-items:center;gap:5px;justify-content:center}
+
+/* ── INPUTS ── */
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--fb);font-size:14px;padding:10px 13px;outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:none}select{cursor:pointer}
+.ig{text-align:left;margin-bottom:13px}
+.ig label{display:block;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:500}
+.iw{position:relative}
+.iw input{padding-left:38px;width:100%}
+.iw .ii{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;width:15px;height:15px}
+.eye-btn{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);padding:0;display:flex}
+.forgot-link{background:none;border:none;color:var(--blue2);font-size:12px;cursor:pointer;font-family:var(--fb);padding:0;text-decoration:underline;text-underline-offset:3px}
+.otp-boxes{display:flex;gap:8px;justify-content:center;margin:8px 0 4px}
+.otp-box{width:44px;height:50px;text-align:center;font-size:20px;font-family:var(--fm);font-weight:700;border-radius:8px;background:var(--surface2);border:1.5px solid var(--border2);color:var(--text);caret-color:var(--accent)}
+.otp-box:focus{border-color:var(--accent);outline:none}
+.otp-timer{font-size:12px;color:var(--text3);margin-top:7px;font-family:var(--fm)}
+.otp-timer span{color:var(--gold)}
+
+/* ── VOTER AUTH SPECIAL ── */
+.voter-auth-note{background:rgba(46,196,182,.07);border:1px solid rgba(46,196,182,.2);border-radius:10px;padding:14px 16px;margin-bottom:20px;text-align:left}
+.voter-auth-note .note-title{font-size:13px;font-weight:600;color:var(--green2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.voter-auth-note ul{font-size:12px;color:var(--text2);line-height:2;padding-left:16px}
+.email-checking{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:10px 0}
+
+/* ── ADMIN LAYOUT ── */
+#admin-dash{flex-direction:row}
+.sidebar{width:215px;background:#080e19;border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;flex-shrink:0}
+.sb-brand{padding:0 18px 20px;border-bottom:1px solid var(--border)}
+.sb-flag{height:4px;background:linear-gradient(90deg,#ff9933 33%,#fff 33%,#fff 66%,#138808 66%);border-radius:2px;margin-bottom:10px}
+.sb-name{font-weight:700;font-size:13px;color:var(--text)}
+.sb-role{font-size:11px;color:var(--text3);margin-top:2px}
+.sb-nav{flex:1;padding:14px 10px}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:7px;border:none;border-left:2px solid transparent;background:transparent;color:var(--text2);cursor:pointer;font-family:var(--fb);font-size:13px;width:100%;margin-bottom:3px;transition:all .15s;text-align:left}
+.ni:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.ni.active{color:var(--accent2);background:rgba(230,57,70,.12);border-left-color:var(--accent)}
+.ni svg{width:14px;height:14px;flex-shrink:0}
+.sb-foot{padding:14px 10px;border-top:1px solid var(--border)}
+.main{flex:1;padding:32px 36px;overflow-y:auto}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px;max-width:500px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px}
+.sc .v{font-size:28px;font-weight:700;font-family:var(--fd)}
+.sc .l{font-size:11px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+.stitle{font-family:var(--fd);font-size:20px;margin-bottom:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:16px}
+.csub{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:11px;font-weight:500}
+.tab-content{display:none}.tab-content.active{display:block}
+.form-row{display:flex;gap:10px;flex-wrap:wrap}
+.form-row input,.form-row select{flex:1;min-width:130px}
+.api-status{display:flex;align-items:center;gap:7px;font-size:12px;padding:8px 14px;border-radius:7px;margin-bottom:20px}
+.api-ok{background:rgba(46,196,182,.08);border:1px solid rgba(46,196,182,.25);color:var(--green2)}
+.api-err{background:rgba(230,57,70,.08);border:1px solid rgba(230,57,70,.25);color:var(--accent2)}
+.api-check{background:rgba(244,162,97,.08);border:1px solid rgba(244,162,97,.25);color:var(--gold)}
+
+/* votes table */
+.vtable{width:100%;border-collapse:collapse;font-size:13px}
+.vtable th{text-align:left;padding:9px 12px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+.vtable td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.vtable tr:last-child td{border-bottom:none}
+.vtable tr:hover td{background:rgba(255,255,255,.02)}
+
+/* candidate cards */
+.cand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.cand-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.cand-avatar{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--surface2)}
+.cand-info .nm{font-size:13px;font-weight:600;color:var(--text)}
+.cand-info .pty{font-size:11px;color:var(--text3);margin-top:2px}
+.cand-info .con{font-size:10px;color:var(--blue2);margin-top:1px}
+.con-group{margin-bottom:22px}
+.con-label{font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+
+/* results */
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.result-bar{margin-bottom:13px}
+.rb-top{display:flex;justify-content:space-between;margin-bottom:5px;align-items:center}
+.rb-name{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:7px}
+.rb-party{font-size:11px;color:var(--text3)}
+.rb-count{font-size:12px;color:var(--text3);font-family:var(--fm)}
+.bar-track{background:var(--surface2);border-radius:4px;height:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.winner-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--gold);background:rgba(244,162,97,.1);border:1px solid rgba(244,162,97,.25);border-radius:99px;padding:3px 10px}
+
+/* ── VOTER PORTAL ── */
+#voter-portal{flex-direction:column}
+.voter-main{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem}
+.ballot-wrap{width:100%;max-width:620px}
+.ballot-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.ballot-title{font-family:var(--fd);font-size:22px}
+.verified-tag{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--green2);margin-top:4px;font-family:var(--fm)}
+.ballot-role-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.ballot-role-label{font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:14px}
+.candidate-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px}
+.cand-option{display:flex;align-items:center;gap:11px;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;cursor:pointer;transition:all .15s}
+.cand-option:hover{background:#182840}
+.cand-option.selected{border-color:var(--green2);background:rgba(6,214,160,.07)}
+.co-sym{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:var(--surface)}
+.co-info{flex:1}
+.co-info .nm{font-size:13px;font-weight:600;color:var(--text)}
+.co-info .pty{font-size:11px;color:var(--text3);margin-top:2px}
+.check-circle{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;transition:all .15s;color:transparent}
+.cand-option.selected .check-circle{background:var(--green2);border-color:var(--green2);color:#fff}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:9px;font-family:var(--fb);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-top:4px}
+.submit-btn.ready{background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;box-shadow:0 4px 22px rgba(230,57,70,.38)}
+.submit-btn.ready:hover{transform:translateY(-1px)}
+.submit-btn.disabled{background:var(--surface2);color:var(--text3);cursor:not-allowed}
+
+/* success / blocked */
+.center-panel{text-align:center;max-width:420px}
+.big-icon{font-size:58px;margin-bottom:18px}
+.panel-title{font-family:var(--fd);font-size:24px;margin-bottom:10px}
+.panel-sub{color:var(--text2);font-size:14px;line-height:1.9;margin-bottom:26px}
+.voted-email{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 18px;font-family:var(--fm);font-size:13px;margin-bottom:26px;color:var(--green2)}
+
+.loader{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.loader-dark{border-color:rgba(0,0,0,.15);border-top-color:var(--accent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+
+<!-- SVG ICONS -->
+<svg style="display:none"><defs>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></symbol>
+  <symbol id="i-bar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-vote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+</defs></svg>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  LANDING                                   -->
+<!-- ══════════════════════════════════════════ -->
+<div id="landing" class="view active">
+  <div class="ln-glow"></div><div class="ln-grid"></div><div class="ln-flag"></div>
+  <div class="ln-content fade-in">
+    <div class="ln-emblem">⚖️</div>
+    <div class="ln-badge">🔒 Voting Platform</div>
+    <div class="ln-sub">தமிழ்நாடு · Tamil Nadu</div>
+    <h1 class="ln-title">Election<br><span>Voting System</span></h1>
+    <p class="ln-desc">Enter your email to vote. One email = one vote.<br>No pre-registration required.</p>
+    <div class="ln-btns">
+      <button class="btn btn-ghost" onclick="showAdminAuth()"><svg width="14" height="14"><use href="#i-shield"/></svg>Admin Portal</button>
+      <button class="btn btn-green" onclick="showView('voter-auth')"><svg width="15" height="15"><use href="#i-vote"/></svg>Cast Your Vote<svg width="14" height="14"><use href="#i-arrow"/></svg></button>
+    </div>
+    <div class="ln-stats">
+      <div class="ln-stat"><div class="v" id="ls-cands">—</div><div class="l">Candidates</div></div>
+      <div class="ln-stat"><div class="v" id="ls-votes">—</div><div class="l">Votes Cast</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  ADMIN AUTH                                -->
+<!-- ══════════════════════════════════════════ -->
+<div id="admin-auth" class="view">
+  <div class="auth-card fade-in">
+    <div class="auth-icon">🏛️</div>
+    <div class="step-dots">
+      <div class="sdot active" id="d1"></div>
+      <div class="sdot" id="d2"></div>
+      <div class="sdot" id="d3"></div>
+    </div>
+
+    <!-- Step 1: Email -->
+    <div class="auth-step active" id="as1">
+      <div class="auth-title">Admin Portal</div>
+      <div class="auth-sub">Enter your registered admin email</div>
+      <!--<div class="demo-creds">📋 Demo credentials<br>Email: <b>admin@election.tn.gov.in</b><br>Password: <b>Admin@TN2024</b><br>PIN: <b>7391</b></div>
+      <div class="ig"><label>Email Address</label> -->
+        <div class="iw"><svg class="ii"><use href="#i-mail"/></svg>
+          <input type="email" id="ae" placeholder="admin@election.com" onkeydown="if(event.key==='Enter')aS2()">
+        </div>
+      </div>
+      <p id="er1" class="auth-err" style="display:none"><svg width="12" height="12"><use href="#i-x"/></svg><span></span></p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="aS2()">Continue <svg width="14" height="14"><use href="#i-arrow"/></svg></button>
+      <br><button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px" onclick="showView('landing')">← Back</button>
+    </div>
+
+    <!-- Step 2: Password + PIN -->
+    <div class="auth-step" id="as2">
+      <div class="auth-title">Verify Identity</div>
+      <div class="auth-sub" id="as2sub">Enter your password and security PIN</div>
+      <div class="ig"><label>Password</label>
+        <div class="iw"><svg class="ii"><use href="#i-key"/></svg>
+          <input type="password" id="apw" placeholder="••••••••" onkeydown="if(event.key==='Enter')document.getElementById('apin').focus()">
+          <button class="eye-btn" onclick="tpwd('apw',this)"><svg width="15" height="15"><use href="#i-eye"/></svg></button>
+        </div>
+      </div>
+      <div class="ig"><label>Security PIN</label>
+        <div class="iw"><svg class="ii"><use href="#i-hash"/></svg>
+          <input type="password" id="apin" placeholder="4-digit PIN" maxlength="4" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="forgot-link" onclick="showOTP()">Forgot password?</button>
+      </div>
+      <p id="er2" class="auth-err" style="display:none"><svg width="12" height="12"><use href="#i-x"/></svg><span></span></p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()"><svg width="15" height="15"><use href="#i-shield"/></svg>Unlock Panel</button>
+      <br><button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px" onclick="aSt(1)">← Back</button>
+    </div>
+
+    <!-- Step 3: OTP -->
+    <div class="auth-step" id="as3">
+      <div class="auth-title">Reset Password</div>
+      <div class="auth-sub">OTP sent to your admin email</div>
+      <div class="otp-boxes">
+        <input class="otp-box" type="text" maxlength="1" oninput="oi(this,0)" onkeydown="ok(event,0)" id="o0">
+        <input class="otp-box" type="text" maxlength="1" oninput="oi(this,1)" onkeydown="ok(event,1)" id="o1">
+        <input class="otp-box" type="text" maxlength="1" oninput="oi(this,2)" onkeydown="ok(event,2)" id="o2">
+        <input class="otp-box" type="text" maxlength="1" oninput="oi(this,3)" onkeydown="ok(event,3)" id="o3">
+        <input class="otp-box" type="text" maxlength="1" oninput="oi(this,4)" onkeydown="ok(event,4)" id="o4">
+        <input class="otp-box" type="text" maxlength="1" oninput="oi(this,5)" onkeydown="ok(event,5)" id="o5">
+      </div>
+      <div class="otp-timer" id="otmr">Expires in <span id="ocnt">02:00</span></div>
+      <p id="er3" class="auth-err" style="display:none"><svg width="12" height="12"><use href="#i-x"/></svg><span></span></p>
+      <p id="ok3" class="auth-ok" style="display:none"><svg width="12" height="12"><use href="#i-check"/></svg><span></span></p>
+      <div id="npf" style="display:none;margin-top:14px">
+        <div class="ig"><label>New Password</label>
+          <div class="iw"><svg class="ii"><use href="#i-key"/></svg>
+            <input type="password" id="np1" placeholder="New password">
+            <button class="eye-btn" onclick="tpwd('np1',this)"><svg width="15" height="15"><use href="#i-eye"/></svg></button>
+          </div>
+        </div>
+        <div class="ig"><label>Confirm Password</label>
+          <div class="iw"><svg class="ii"><use href="#i-key"/></svg><input type="password" id="np2" placeholder="Confirm password"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doReset()"><svg width="14" height="14"><use href="#i-check"/></svg>Set New Password</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="aSt(2)">← Back</button>
+        <button class="forgot-link" id="rsnd" style="display:none" onclick="sendOTP()"><svg width="11" height="11" style="vertical-align:middle;margin-right:3px"><use href="#i-refresh"/></svg>Resend OTP</button>
+      </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  ADMIN DASHBOARD                           -->
+<!-- ══════════════════════════════════════════ -->
+<div id="admin-dash" class="view">
+  <div class="sidebar">
+    <div class="sb-brand"><div class="sb-flag"></div><div class="sb-name">Admin Panel</div><div class="sb-role">TN Election System</div></div>
+    <nav class="sb-nav">
+      <button class="ni active" onclick="sTab('candidates',this)"><svg><use href="#i-award"/></svg>Candidates</button>
+      <button class="ni" onclick="sTab('results',this)"><svg><use href="#i-bar"/></svg>Live Results</button>
+      <button class="ni" onclick="sTab('votes',this)"><svg><use href="#i-vote"/></svg>Vote Log</button>
+      <button class="ni" onclick="sTab('settings',this)"><svg><use href="#i-settings"/></svg>Settings</button>
+    </nav>
+    <div class="sb-foot"><button class="ni" onclick="adminLogout()" style="width:100%"><svg><use href="#i-logout"/></svg>Logout</button></div>
+  </div>
+  <div class="main">
+    <div class="stats-grid">
+      <div class="sc"><div class="v" id="dc" style="color:var(--gold)">—</div><div class="l">Candidates</div></div>
+      <div class="sc"><div class="v" id="dv" style="color:var(--green2)">—</div><div class="l">Votes Cast</div></div>
+    </div>
+    <div id="api-bar" class="api-status api-check"><span class="loader"></span> Connecting to Google Sheets…</div>
+
+    <!-- Candidates Tab -->
+    <div id="tab-candidates" class="tab-content active">
+      <h2 class="stitle">Candidates</h2>
+      <div class="card">
+        <div class="csub">Add Candidate</div>
+        <div class="form-row">
+          <input id="cn" placeholder="Candidate Name *">
+          <input id="cp" placeholder="Party Name *">
+          <input id="cc" placeholder="Constituency *">
+          <input id="cs" placeholder="Symbol emoji 🌸">
+          <button class="btn btn-primary btn-sm" onclick="addCand()" style="flex-shrink:0"><svg width="13" height="13"><use href="#i-plus"/></svg>Add</button>
+        </div>
+        <p id="cerr" class="auth-err" style="display:none;margin-top:8px"><svg width="12" height="12"><use href="#i-x"/></svg><span></span></p>
+      </div>
+      <div id="cand-list"></div>
+    </div>
+
+    <!-- Results Tab -->
+    <div id="tab-results" class="tab-content">
+      <h2 class="stitle">Live Results</h2>
+      <p id="res-meta" style="color:var(--text3);font-size:13px;margin-bottom:22px"></p>
+      <div id="results-list"></div>
+    </div>
+
+    <!-- Vote Log Tab -->
+    <div id="tab-votes" class="tab-content">
+      <h2 class="stitle">Vote Log</h2>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:18px;line-height:1.7">
+        Every vote is stored with its email address. The system checks this list to prevent duplicate votes — no pre-registration needed.
+      </p>
+      <div class="card" style="overflow-x:auto">
+        <div class="csub" id="vote-log-lbl">Recorded Votes (0)</div>
+        <table class="vtable">
+          <thead><tr><th>Email</th><th>Candidate</th><th>Party</th><th>Constituency</th><th>Timestamp</th></tr></thead>
+          <tbody id="vote-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div id="tab-settings" class="tab-content">
+      <h2 class="stitle">Settings</h2>
+      <div class="card">
+        <div class="csub">Google Apps Script URL</div>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.7">Paste your deployed Web App URL. All candidates and votes are stored in Google Sheets.</p>
+        <div class="form-row" style="flex-wrap:nowrap">
+          <input id="surl" type="url" placeholder="https://script.google.com/macros/s/…/exec" style="font-family:var(--fm);font-size:12px">
+          <button class="btn btn-primary btn-sm" onclick="saveURL()" style="flex-shrink:0;white-space:nowrap"><svg width="13" height="13"><use href="#i-check"/></svg>Save & Test</button>
+        </div>
+        <p id="url-st" style="font-size:12px;margin-top:8px;display:none"></p>
+      </div>
+      <div class="card">
+        <div class="csub">How Duplicate Prevention Works</div>
+        <div style="font-size:13px;color:var(--text2);line-height:2">
+          ✅ No voter registry required<br>
+          ✅ Any email can vote — once<br>
+          ✅ On vote submission, email is checked against the <b>Votes</b> sheet<br>
+          ✅ If the email already exists → vote rejected instantly<br>
+          ✅ Race condition guard — double-checked before writing<br>
+          ✅ Admin can see every email that voted in the <b>Vote Log</b> tab
+        </div>
+      </div>
+      <div class="card">
+        <div class="csub">Setup Instructions</div>
+        <ol style="font-size:13px;color:var(--text2);line-height:2.3;padding-left:18px">
+          <li>Create a Google Sheet, copy its ID from the URL</li>
+          <li>Go to <b>script.google.com</b> → New Project</li>
+          <li>Paste the <b>Code.gs</b> file, set your <b>SPREADSHEET_ID</b></li>
+          <li>Run <b>setupSheets()</b> once — creates <b>Candidates</b> + <b>Votes</b> tabs</li>
+          <li>Deploy → Web App (Execute as: Me, Access: Anyone)</li>
+          <li>Paste the URL above and click <b>Save & Test</b></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  VOTER AUTH                                -->
+<!-- ══════════════════════════════════════════ -->
+<div id="voter-auth" class="view">
+  <div class="auth-card fade-in">
+    <div class="auth-icon">🗳️</div>
+    <div class="auth-title">Cast Your Vote</div>
+    <div class="auth-sub">Enter your email address to access the ballot</div>
+    <div class="voter-auth-note">
+      <div class="note-title">ℹ️ How it works</div>
+      <ul>
+        <li>No registration needed — any valid email works</li>
+        <li>Your email is checked against existing votes</li>
+        <li>Each email can only vote <strong>once</strong></li>
+      </ul>
+    </div>
+    <div class="ig"><label>Your Email Address</label>
+      <div class="iw"><svg class="ii"><use href="#i-mail"/></svg>
+        <input type="email" id="vemail" placeholder="yourname@email.com" onkeydown="if(event.key==='Enter')doVoterCheck()">
+      </div>
+    </div>
+    <p id="verr" class="auth-err" style="display:none"><svg width="12" height="12"><use href="#i-x"/></svg><span></span></p>
+    <div id="vchecking" class="email-checking" style="display:none"><span class="loader loader-dark" style="border-top-color:var(--accent)"></span>Checking email…</div>
+    <button class="btn btn-green" style="width:100%;justify-content:center;margin-top:12px" onclick="doVoterCheck()" id="vbtn">
+      <svg width="15" height="15"><use href="#i-vote"/></svg>Access Ballot
+    </button>
+    <br><button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px" onclick="showView('landing')">← Back</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  VOTER PORTAL                              -->
+<!-- ══════════════════════════════════════════ -->
+<div id="voter-portal" class="view">
+  <div class="topbar">
+    <div class="topbar-brand"><div class="topbar-flag"></div>TN Election Portal</div>
+    <button class="btn btn-ghost btn-sm" onclick="showView('landing')"><svg width="11" height="11"><use href="#i-logout"/></svg>Exit</button>
+  </div>
+  <div class="voter-main">
+
+    <!-- Ballot -->
+    <div id="ballot-view" class="ballot-wrap fade-in" style="display:none">
+      <div class="ballot-hdr">
+        <div>
+          <div class="ballot-title">Official Ballot</div>
+          <div class="verified-tag">✅ <span id="vt-email"></span></div>
+        </div>
+        <div style="font-size:11px;color:var(--text3)">Select one candidate</div>
+      </div>
+      <div id="ballot-candidates"></div>
+      <button id="sbtn" class="submit-btn disabled" onclick="castVote()">
+        <svg width="16" height="16"><use href="#i-vote"/></svg>Submit Vote
+      </button>
+    </div>
+
+    <!-- Already voted -->
+    <div id="already-voted" class="center-panel" style="display:none">
+      <div class="big-icon">🔒</div>
+      <div class="panel-title">Already Voted</div>
+      <p class="panel-sub">This email has already been used to cast a vote.<br>Each email address may only vote once.</p>
+      <div class="voted-email" id="av-email"></div>
+      <br><button class="btn btn-ghost" onclick="showView('landing')">← Return to Home</button>
+    </div>
+
+    <!-- Success -->
+    <div id="vote-success" class="center-panel" style="display:none">
+      <div class="big-icon">✅</div>
+      <div class="panel-title">Vote Cast!</div>
+      <p class="panel-sub">Your vote has been securely recorded.<br>Thank you for participating in the election.</p>
+      <div class="voted-email" id="suc-email">🔒 <span id="suc-em"></span> — Voted</div>
+      <br><button class="btn btn-ghost" onclick="showView('landing')">← Return to Home</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!--  SCRIPT                                    -->
+<!-- ══════════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════
+let SCRIPT_URL = localStorage.getItem('tn_url') || '';
+const ADMIN = { email:'sthivagar0326@gmail.com', password:'Thiva3232@*', pin:'3267' };
+let otpCode='', otpTmr=null, otpOk=false;
+let voterEmail='', selectedCand=null;
+
+// ── VIEW ──────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='landing') fetchStats();
+  if(id==='admin-dash') { fetchAdminData(); document.getElementById('surl').value=SCRIPT_URL; }
+}
+function showAdminAuth(){ showView('admin-auth'); aSt(1); }
+
+// ── API ───────────────────────────────────────
+async function api(action,data={}){
+  if(!SCRIPT_URL) return {ok:false,error:'No Script URL. Go to Settings.'};
+  try{
+    const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,...data}),headers:{'Content-Type':'text/plain'}});
+    return await r.json();
+  }catch(e){return{ok:false,error:e.message};}
+}
+async function apiGet(action){
+  if(!SCRIPT_URL) return{ok:false,error:'No Script URL'};
+  try{ const r=await fetch(`${SCRIPT_URL}?action=${action}`); return await r.json(); }
+  catch(e){return{ok:false,error:e.message};}
+}
+
+// ── STATS ─────────────────────────────────────
+async function fetchStats(){
+  const res=await apiGet('getStats');
+  document.getElementById('ls-cands').textContent = res.ok ? res.totalCandidates : '—';
+  document.getElementById('ls-votes').textContent  = res.ok ? res.totalVotes : '—';
+}
+async function fetchAdminData(){
+  const bar=document.getElementById('api-bar');
+  if(!SCRIPT_URL){ bar.className='api-status api-err'; bar.innerHTML='⚠️ No Script URL — go to <b>Settings</b> tab'; return; }
+  bar.className='api-status api-check'; bar.innerHTML='<span class="loader"></span> Connecting…';
+  const res=await apiGet('getStats');
+  if(res.ok){
+    bar.className='api-status api-ok'; bar.innerHTML='✅ Connected to Google Sheets';
+    document.getElementById('dc').textContent=res.totalCandidates;
+    document.getElementById('dv').textContent=res.totalVotes;
+    loadCands(); loadResults();
+  } else {
+    bar.className='api-status api-err'; bar.innerHTML=`❌ ${res.error}`;
+  }
+}
+
+// ── ADMIN AUTH ────────────────────────────────
+function aSt(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('as'+i).classList.toggle('active',i===n);
+    const d=document.getElementById('d'+i);
+    d.className='sdot'+(i<n?' done':i===n?' active':'');
+  });
+}
+function aS2(){
+  const e=document.getElementById('ae').value.trim().toLowerCase();
+  if(!e){showE('er1','Enter your email.');return;}
+  if(e!==ADMIN.email){showE('er1','Email not found in admin registry.');return;}
+  hideM('er1'); document.getElementById('as2sub').textContent=`Credentials for ${e}`;
+  aSt(2); setTimeout(()=>document.getElementById('apw').focus(),100);
+}
+function doLogin(){
+  const pw=document.getElementById('apw').value;
+  const pi=document.getElementById('apin').value.trim();
+  if(!pw){showE('er2','Enter your password.');return;}
+  if(!pi){showE('er2','Enter your PIN.');return;}
+  const sp=localStorage.getItem('tn_adm_pw')||ADMIN.password;
+  if(pw!==sp){showE('er2','Incorrect password.');return;}
+  if(pi!==ADMIN.pin){showE('er2','Incorrect PIN.');return;}
+  hideM('er2'); showView('admin-dash');
+}
+function adminLogout(){showView('landing');}
+
+// OTP flow
+function showOTP(){
+  aSt(3); otpOk=false;
+  document.getElementById('npf').style.display='none';
+  document.getElementById('rsnd').style.display='none';
+  hideM('er3'); hideM('ok3');
+  [0,1,2,3,4,5].forEach(i=>document.getElementById('o'+i).value='');
+  sendOTP();
+}
+function sendOTP(){
+  otpCode=String(Math.floor(100000+Math.random()*900000));
+  setTimeout(()=>alert(`📧 OTP for ${ADMIN.email}\n\nCode: ${otpCode}\n\n(In production this is emailed via Apps Script)`),200);
+  startTimer();
+  document.getElementById('o0').focus();
+}
+function oi(el,i){
+  el.value=el.value.replace(/\D/g,'');
+  if(el.value&&i<5)document.getElementById('o'+(i+1)).focus();
+  if([0,1,2,3,4,5].every(j=>document.getElementById('o'+j).value))chkOTP();
+}
+function ok(e,i){if(e.key==='Backspace'&&!e.target.value&&i>0)document.getElementById('o'+(i-1)).focus();}
+function chkOTP(){
+  const entered=[0,1,2,3,4,5].map(i=>document.getElementById('o'+i).value).join('');
+  if(entered===otpCode){otpOk=true;showO('ok3','OTP verified!');hideM('er3');document.getElementById('npf').style.display='block';}
+  else showE('er3','Incorrect OTP. Try again.');
+}
+function doReset(){
+  if(!otpOk)return;
+  const n=document.getElementById('np1').value,c=document.getElementById('np2').value;
+  if(!n||n.length<6){showE('er3','Min 6 characters.');return;}
+  if(n!==c){showE('er3','Passwords do not match.');return;}
+  localStorage.setItem('tn_adm_pw',n);ADMIN.password=n;
+  showO('ok3','Password updated! Redirecting…');
+  setTimeout(()=>{aSt(2);hideM('ok3');},1800);
+}
+function startTimer(){
+  clearInterval(otpTmr);let s=120;
+  const te=document.getElementById('otmr'),ce=document.getElementById('ocnt');
+  te.style.display='block';
+  function tick(){const m=Math.floor(s/60).toString().padStart(2,'0'),sc=(s%60).toString().padStart(2,'0');ce.textContent=`${m}:${sc}`;if(s<=0){clearInterval(otpTmr);te.textContent='OTP expired.';document.getElementById('rsnd').style.display='inline';}s--;}
+  tick();otpTmr=setInterval(tick,1000);
+}
+
+// ── SETTINGS ──────────────────────────────────
+function saveURL(){
+  const u=document.getElementById('surl').value.trim();
+  if(!u)return;
+  SCRIPT_URL=u;localStorage.setItem('tn_url',u);
+  const st=document.getElementById('url-st');
+  st.style.display='block';st.style.color='var(--gold)';st.textContent='Testing…';
+  apiGet('getStats').then(res=>{
+    if(res.ok){st.style.color='var(--green2)';st.textContent='✅ Connected!';fetchAdminData();}
+    else{st.style.color='var(--accent2)';st.textContent='❌ '+res.error;}
+  });
+}
+function sTab(n,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');btn.classList.add('active');
+  if(n==='candidates')loadCands();
+  if(n==='results')loadResults();
+  if(n==='votes')loadVoteLog();
+  if(n==='settings')document.getElementById('surl').value=SCRIPT_URL;
+}
+
+// ── CANDIDATES ────────────────────────────────
+async function loadCands(){
+  const res=await apiGet('getCandidates');
+  const wrap=document.getElementById('cand-list');
+  if(!res.ok){wrap.innerHTML=`<p style="color:var(--accent2)">${res.error}</p>`;return;}
+  const cands=res.candidates||[];
+  if(!cands.length){wrap.innerHTML='<p style="color:var(--text3);font-size:13px">No candidates yet.</p>';return;}
+  const cons=[...new Set(cands.map(c=>c.constituency||'General'))];
+  wrap.innerHTML=cons.map(con=>{
+    const rc=cands.filter(c=>(c.constituency||'General')===con);
+    return`<div class="con-group">
+      <div class="con-label">📍 ${con}</div>
+      <div class="cand-grid">${rc.map(c=>`
+        <div class="cand-card">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="cand-avatar">${c.symbol||'⭐'}</div>
+            <div class="cand-info"><div class="nm">${c.name}</div><div class="pty">${c.party}</div><div class="con">${c.constituency}</div></div>
+          </div>
+          <button class="btn btn-danger btn-sm" onclick="remCand('${c.id}')"><svg width="12" height="12"><use href="#i-trash"/></svg></button>
+        </div>`).join('')}</div></div>`;
+  }).join('');
+}
+async function addCand(){
+  const n=document.getElementById('cn').value.trim();
+  const p=document.getElementById('cp').value.trim();
+  const c=document.getElementById('cc').value.trim();
+  const s=document.getElementById('cs').value.trim()||'⭐';
+  if(!n||!p||!c){showE('cerr','Name, Party and Constituency are required.');return;}
+  hideM('cerr');
+  const res=await api('addCandidate',{name:n,party:p,constituency:c,symbol:s});
+  if(res.ok){['cn','cp','cc','cs'].forEach(id=>document.getElementById(id).value='');loadCands();fetchAdminData();}
+  else showE('cerr',res.error);
+}
+async function remCand(id){
+  if(!confirm('Remove this candidate?'))return;
+  const res=await api('removeCandidate',{id});
+  if(res.ok)loadCands(); else alert('Error: '+res.error);
+}
+
+// ── RESULTS ───────────────────────────────────
+async function loadResults(){
+  const res=await apiGet('getResults');
+  const wrap=document.getElementById('results-list');
+  if(!res.ok){wrap.innerHTML=`<p style="color:var(--accent2)">${res.error}</p>`;return;}
+  const results=res.results||[];
+  const total=results.reduce((s,c)=>s+c.votes,0);
+  document.getElementById('res-meta').textContent=`${total} total votes recorded`;
+  const cons=[...new Set(results.map(c=>c.constituency||'General'))];
+  if(!cons.length){wrap.innerHTML='<p style="color:var(--text3)">No votes recorded yet.</p>';return;}
+  const BAR_COLORS=['#e63946','#f4a261','#2ec4b6','#457b9d','#a8dadc','#06d6a0','#118ab2','#ffd166'];
+  wrap.innerHTML=cons.map(con=>{
+    const rc=results.filter(c=>(c.constituency||'General')===con).sort((a,b)=>b.votes-a.votes);
+    const maxV=Math.max(...rc.map(c=>c.votes),1);
+    const winner=rc[0];
+    return`<div class="result-card">
+      <div class="result-header">
+        <div class="con-label">📍 ${con}</div>
+        ${winner&&winner.votes>0?`<div class="winner-tag"><svg width="11" height="11"><use href="#i-crown"/></svg>${winner.symbol||'⭐'} ${winner.name} · ${winner.party}</div>`:''}
+      </div>
+      ${rc.map((c,i)=>{
+        const pct=total?Math.round(c.votes/total*100):0;
+        const w=Math.round(c.votes/maxV*100);
+        return`<div class="result-bar">
+          <div class="rb-top">
+            <span class="rb-name">${c.symbol||'⭐'} ${c.name} <span class="rb-party">${c.party}</span></span>
+            <span class="rb-count">${c.votes} (${pct}%)</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${BAR_COLORS[i%BAR_COLORS.length]}"></div></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ── VOTE LOG ──────────────────────────────────
+async function loadVoteLog(){
+  // Fetch raw votes from Apps Script
+  const res=await apiGet('getResults');
+  // We'll re-fetch votes separately using a custom action if needed;
+  // For now show a message directing admin to Google Sheets
+  const tbody=document.getElementById('vote-tbody');
+  if(!SCRIPT_URL){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Configure Script URL in Settings first.</td></tr>';return;}
+  tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">📊 Full vote log is available directly in your <b>Google Sheet → Votes tab</b><br><br><span style="font-size:12px">Each row = one unique email. Duplicates are rejected at the server.</span></td></tr>';
+  // Update label from stats
+  const st=await apiGet('getStats');
+  if(st.ok) document.getElementById('vote-log-lbl').textContent=`Recorded Votes (${st.totalVotes})`;
+}
+
+// ── VOTER FLOW ────────────────────────────────
+async function doVoterCheck(){
+  const email=document.getElementById('vemail').value.trim().toLowerCase();
+  if(!email){showE('verr','Please enter your email address.');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showE('verr','Please enter a valid email address.');return;}
+  hideM('verr');
+  const btn=document.getElementById('vbtn');
+  const chk=document.getElementById('vchecking');
+  btn.style.display='none'; chk.style.display='flex';
+
+  const res=await api('checkEmail',{email});
+  btn.style.display='flex'; chk.style.display='none';
+
+  if(!res.ok && res.alreadyVoted){
+    // Already voted
+    voterEmail=email;
+    showView('voter-portal');
+    showPanel('already-voted');
+    document.getElementById('av-email').textContent='🔒 '+email;
+    return;
+  }
+  if(!res.ok){showE('verr',res.error);return;}
+
+  // Clean email — load ballot
+  voterEmail=email; selectedCand=null;
+  showView('voter-portal');
+  showPanel('ballot-view');
+  document.getElementById('vt-email').textContent=email;
+  loadBallot();
+}
+
+async function loadBallot(){
+  const wrap=document.getElementById('ballot-candidates');
+  wrap.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><span class="loader"></span></div>';
+  const res=await apiGet('getCandidates');
+  if(!res.ok){wrap.innerHTML=`<p style="color:var(--accent2)">${res.error}</p>`;return;}
+  const cands=res.candidates||[];
+  if(!cands.length){wrap.innerHTML='<p style="color:var(--text3);padding:20px 0">No candidates available.</p>';return;}
+  const cons=[...new Set(cands.map(c=>c.constituency||'General'))];
+  wrap.innerHTML=cons.map(con=>{
+    const rc=cands.filter(c=>(c.constituency||'General')===con);
+    return`<div class="ballot-role-card">
+      <div class="ballot-role-label">📍 ${con}</div>
+      <div class="candidate-options">
+        ${rc.map(c=>`
+          <div class="cand-option" id="co-${c.id}" onclick="selCand('${c.id}',this)">
+            <div class="co-sym">${c.symbol||'⭐'}</div>
+            <div class="co-info"><div class="nm">${c.name}</div><div class="pty">${c.party}</div></div>
+            <div class="check-circle">✓</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selCand(id,el){
+  document.querySelectorAll('.cand-option').forEach(o=>{o.classList.remove('selected');});
+  el.classList.add('selected');
+  selectedCand=id;
+  document.getElementById('sbtn').className='submit-btn ready';
+}
+
+async function castVote(){
+  if(!selectedCand)return;
+  const btn=document.getElementById('sbtn');
+  btn.innerHTML='<span class="loader"></span> Submitting…'; btn.disabled=true;
+  const res=await api('castVote',{email:voterEmail,candidateId:selectedCand});
+  btn.innerHTML='<svg width="16" height="16"><use href="#i-vote"/></svg>Submit Vote'; btn.disabled=false;
+  if(res.ok){
+    document.getElementById('suc-em').textContent=voterEmail;
+    showPanel('vote-success');
+  } else {
+    // Could be a race condition duplicate
+    if(res.error&&res.error.includes('already')){
+      showPanel('already-voted');
+      document.getElementById('av-email').textContent='🔒 '+voterEmail;
+    } else alert('Error: '+res.error);
+  }
+}
+
+function showPanel(id){
+  ['ballot-view','already-voted','vote-success'].forEach(p=>document.getElementById(p).style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+// ── HELPERS ───────────────────────────────────
+function tpwd(id,btn){const i=document.getElementById(id);const t=i.type==='text';i.type=t?'password':'text';btn.innerHTML=`<svg width="15" height="15"><use href="#i-eye${t?'':'-off'}"/></svg>`;}
+function showE(id,msg){const e=document.getElementById(id);e.style.display='flex';e.querySelector('span').textContent=msg;}
+function showO(id,msg){const e=document.getElementById(id);e.style.display='flex';e.querySelector('span').textContent=msg;}
+function hideM(id){document.getElementById(id).style.display='none';}
+
+// Init
+fetchStats();
+</script>
+</body>
+</html>
